@@ -1,7 +1,7 @@
 import React, { Fragment } from "react";
 import { NavLink } from "react-router-dom";
 import { Menu, Transition } from "@headlessui/react";
-import { ChevronDownIcon, XMarkIcon  } from "@heroicons/react/24/solid";
+import { ChevronDownIcon, XMarkIcon } from "@heroicons/react/24/solid";
 
 // ---------- SidebarLink ----------
 const SidebarLink = ({ to, children }) => (
@@ -150,11 +150,15 @@ const Topbar = ({ title, setIsOpen }) => (
     </div>
   </header>
 );
+
+
 // ---------- PageShell ----------
 const PageShell = ({ title, children, setIsOpen }) => (
   <div className="flex-1 min-h-screen bg-white text-slate-100">
     <Topbar title={title} setIsOpen={setIsOpen} />
-    <main className="p-6 max-w-7xl mx-auto">{children}</main>
+    <main className="p-4 sm:p-6 md:max-w-7xl md:mx-auto w-full">
+      {children}
+    </main>
   </div>
 );
 
