@@ -1,7 +1,7 @@
 import React, { Fragment } from "react";
 import { NavLink } from "react-router-dom";
 import { Menu, Transition } from "@headlessui/react";
-import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import { ChevronDownIcon, XMarkIcon  } from "@heroicons/react/24/solid";
 
 // ---------- SidebarLink ----------
 const SidebarLink = ({ to, children }) => (
@@ -19,34 +19,66 @@ const SidebarLink = ({ to, children }) => (
   </NavLink>
 );
 
-// ---------- Sidebar ----------
 export const Sidebar = ({ isOpen, setIsOpen }) => (
   <aside
     className={`fixed md:static z-40 top-0 left-0 h-full w-64 p-6 bg-indigo-800 text-indigo-800 transition-transform duration-300 ${
       isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
     }`}
   >
-    <div className="flex items-center gap-3 font-bold text-white text-lg">
-      <span className="w-3 h-3 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 shadow-md" />
-      CampusOne
+    {/* Close button (mobile only) */}
+    <div className="flex justify-between items-center mb-6">
+      <div className="flex items-center gap-3 font-bold text-white text-lg">
+        <span className="w-3 h-3 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 shadow-md" />
+        CampusOne
+      </div>
+      <button
+        onClick={() => setIsOpen(false)}
+        className="md:hidden text-white hover:text-slate-300"
+      >
+        <XMarkIcon className="w-6 h-6" />
+      </button>
     </div>
 
-    <nav className="mt-8 flex-1 flex flex-col gap-1">
-      <SidebarLink to="/">🏠 Overview</SidebarLink>
-      <SidebarLink to="/courses">📚 Courses</SidebarLink>
-      <SidebarLink to="/timetable">🗓️ Timetable</SidebarLink>
-      <SidebarLink to="/assignments">📝 Assignments</SidebarLink>
-      <SidebarLink to="/grades">🎓 Grades</SidebarLink>
-      <SidebarLink to="/attendance">✅ Attendance</SidebarLink>
-      <SidebarLink to="/fees">💳 Fees</SidebarLink>
-      <SidebarLink to="/messages">✉️ Messages</SidebarLink>
-      <SidebarLink to="/settings">⚙️ Settings</SidebarLink>
+    <nav className="mt-4 flex-1 flex flex-col gap-1">
+      <SidebarLink to="/" setIsOpen={setIsOpen}>
+        🏠 Overview
+      </SidebarLink>
+      <SidebarLink to="/courses" setIsOpen={setIsOpen}>
+        📚 Courses
+      </SidebarLink>
+      <SidebarLink to="/timetable" setIsOpen={setIsOpen}>
+        🗓️ Timetable
+      </SidebarLink>
+      <SidebarLink to="/assignments" setIsOpen={setIsOpen}>
+        📝 Assignments
+      </SidebarLink>
+      <SidebarLink to="/grades" setIsOpen={setIsOpen}>
+        🎓 Grades
+      </SidebarLink>
+      <SidebarLink to="/attendance" setIsOpen={setIsOpen}>
+        ✅ Attendance
+      </SidebarLink>
+      <SidebarLink to="/fees" setIsOpen={setIsOpen}>
+        💳 Fees
+      </SidebarLink>
+      <SidebarLink to="/messages" setIsOpen={setIsOpen}>
+        ✉️ Messages
+      </SidebarLink>
+      <SidebarLink to="/settings" setIsOpen={setIsOpen}>
+        ⚙️ Settings
+      </SidebarLink>
     </nav>
 
     <div className="mt-auto pt-4 border-t border-slate-800">
-      <SidebarLink to="/announcements">📣 Announcements</SidebarLink>
-      <SidebarLink to="/guide">🧭 Student Guide</SidebarLink>
-      <SidebarLink to="/support">🧑‍💼 Support</SidebarLink>
+      <SidebarLink to="/announcements" setIsOpen={setIsOpen}>
+        📣 Announcements
+      </SidebarLink>
+      <SidebarLink to="/guide" setIsOpen={setIsOpen}>
+        🧭 Student Guide
+      </SidebarLink>
+      <SidebarLink to="/support" setIsOpen={setIsOpen}>
+        🧑‍💼 Support
+      </SidebarLink>
     </div>
   </aside>
 );
