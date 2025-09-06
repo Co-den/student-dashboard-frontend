@@ -1,7 +1,6 @@
 // frontend/src/pages/Courses.jsx
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import PageShell from "../components/PageShell";
 import SimpleTable from "../components/SimpleTable";
 import { fetchCourses } from "../store/slices/coursesSlice";
 
@@ -43,32 +42,30 @@ const Courses = () => {
     ]) || [];
 
   return (
-    <PageShell title="Courses">
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-blue-600 rounded-2xl p-4 border border-blue-400">
-          <h2 className="font-bold text-white mb-3">Enrolled Courses</h2>
+    <div className="grid lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-2 bg-blue-600 rounded-2xl p-4 border border-blue-400">
+        <h2 className="font-bold text-white mb-3">Enrolled Courses</h2>
 
-          {loading && <p className="text-white">Loading courses...</p>}
-          {error && <p className="text-red-400">{error}</p>}
-          {!loading && !error && <SimpleTable columns={columns} rows={rows} />}
-        </div>
-
-        <aside className="bg-blue-600 rounded-2xl p-4 border border-blue-400">
-          <h3 className="font-bold text-white mb-3">Resources</h3>
-          <div className="flex flex-col gap-2">
-            <a className="btn text-white bg-blue-400 px-3 py-2 rounded">
-              Syllabus (PDF)
-            </a>
-            <a className="btn text-white bg-blue-400 px-3 py-2 rounded">
-              Lecture Slides
-            </a>
-            <a className="btn text-white bg-blue-400 px-3 py-2 rounded">
-              Reading List
-            </a>
-          </div>
-        </aside>
+        {loading && <p className="text-white">Loading courses...</p>}
+        {error && <p className="text-red-400">{error}</p>}
+        {!loading && !error && <SimpleTable columns={columns} rows={rows} />}
       </div>
-    </PageShell>
+
+      <aside className="bg-blue-600 rounded-2xl p-4 border border-blue-400">
+        <h3 className="font-bold text-white mb-3">Resources</h3>
+        <div className="flex flex-col gap-2">
+          <a className="btn text-white bg-blue-400 px-3 py-2 rounded">
+            Syllabus (PDF)
+          </a>
+          <a className="btn text-white bg-blue-400 px-3 py-2 rounded">
+            Lecture Slides
+          </a>
+          <a className="btn text-white bg-blue-400 px-3 py-2 rounded">
+            Reading List
+          </a>
+        </div>
+      </aside>
+    </div>
   );
 };
 

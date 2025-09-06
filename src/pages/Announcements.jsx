@@ -1,9 +1,8 @@
 import React from "react";
-import PageShell from "../components/PageShell";
 
 
 const Announcements = () => (
-  <PageShell title="Announcements">
+  
     <div className="space-y-4">
       <div className="bg-blue-600 rounded-2xl text-white p-4 border border-blue-400">
         {" "}
@@ -20,7 +19,6 @@ const Announcements = () => (
         </p>
       </div>
     </div>
-  </PageShell>
 );
 
 export default Announcements;

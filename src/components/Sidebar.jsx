@@ -52,9 +52,15 @@ export const Sidebar = ({ isOpen, setIsOpen }) => (
 );
 
 // ---------- Topbar ----------
- const Topbar = ({ title, setIsOpen }) => (
+const Topbar = ({ title, setIsOpen }) => (
   <header className="flex items-center justify-between gap-4 p-4 bg-slate-800/60 backdrop-blur sticky top-0 z-30">
     <div className="flex items-center gap-4">
+      <button
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="md:hidden p-2 rounded-lg bg-white/5"
+      >
+        ☰
+      </button>
       <h1 className="text-xl font-extrabold text-white">{title}</h1>
     </div>
 
@@ -67,13 +73,10 @@ export const Sidebar = ({ isOpen, setIsOpen }) => (
         Export
       </button>
 
-      {/* Avatar Dropdown also toggles Sidebar on mobile */}
+      {/* Avatar Dropdown */}
       <Menu as="div" className="relative">
         <div>
-          <Menu.Button
-            onClick={() => setIsOpen((prev) => !prev)} // toggle sidebar here
-            className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 shadow-inner focus:outline-none"
-          >
+          <Menu.Button className="flex items-center gap-2 w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 shadow-inner focus:outline-none">
             <ChevronDownIcon className="w-4 h-4 text-white absolute bottom-0 right-0 translate-x-1 translate-y-1 bg-blue-400 rounded-full" />
           </Menu.Button>
         </div>
@@ -115,5 +118,12 @@ export const Sidebar = ({ isOpen, setIsOpen }) => (
     </div>
   </header>
 );
+// ---------- PageShell ----------
+const PageShell = ({ title, children, setIsOpen }) => (
+  <div className="flex-1 min-h-screen bg-white text-slate-100">
+    <Topbar title={title} setIsOpen={setIsOpen} />
+    <main className="p-6 max-w-7xl mx-auto">{children}</main>
+  </div>
+);
 
-export default Topbar;
+export { Topbar, PageShell };
