@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+
+// Components
 import { Sidebar, PageShell } from "./components/Sidebar";
 import Overview from "./pages/Overview";
 import Courses from "./pages/Courses";
@@ -13,116 +16,189 @@ import Settings from "./pages/Settings";
 import Announcements from "./pages/Announcements";
 import Guide from "./pages/Guide";
 import Support from "./pages/Support";
+import Login from "./pages/Login";
+import Register from "./pages/Register"; // ✅ new
 
+import "./App.css";
+
+// ---------- ProtectedRoute ----------
+const ProtectedRoute = ({ children }) => {
+  const { user } = useSelector((state) => state.auth);
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
+// ---------- Layout Wrapper ----------
+const Layout = ({ children }) => {
+  const [isOpen, setSidebarOpen] = useState(false);
+  return (
+    <div className="flex min-h-screen bg-slate-900">
+      <Sidebar isOpen={isOpen} setIsOpen={setSidebarOpen} />
+      <div className="flex-1 flex flex-col">{children}</div>
+    </div>
+  );
+};
+
+// ---------- App ----------
 const App = () => {
-  const [isOpen, setIsOpen] = useState(false); // 👈 sidebar state
-
   return (
     <Router>
-      <div className="flex">
-        <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} /> {/* ✅ Register added */}
 
-        <div className="flex-1">
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <PageShell title="Overview" setIsOpen={setIsOpen}>
+        {/* Protected Dashboard Routes */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PageShell title="Overview">
                   <Overview />
                 </PageShell>
-              }
-            />
-            <Route
-              path="/courses"
-              element={
-                <PageShell title="Courses" setIsOpen={setIsOpen}>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/courses"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PageShell title="Courses">
                   <Courses />
                 </PageShell>
-              }
-            />
-            <Route
-              path="/timetable"
-              element={
-                <PageShell title="Timetable" setIsOpen={setIsOpen}>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/timetable"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PageShell title="Timetable">
                   <Timetable />
                 </PageShell>
-              }
-            />
-            <Route
-              path="/assignments"
-              element={
-                <PageShell title="Assignments" setIsOpen={setIsOpen}>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/assignments"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PageShell title="Assignments">
                   <Assignments />
                 </PageShell>
-              }
-            />
-            <Route
-              path="/grades"
-              element={
-                <PageShell title="Grades" setIsOpen={setIsOpen}>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/grades"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PageShell title="Grades">
                   <Grades />
                 </PageShell>
-              }
-            />
-            <Route
-              path="/attendance"
-              element={
-                <PageShell title="Attendance" setIsOpen={setIsOpen}>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/attendance"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PageShell title="Attendance">
                   <Attendance />
                 </PageShell>
-              }
-            />
-            <Route
-              path="/fees"
-              element={
-                <PageShell title="Fees" setIsOpen={setIsOpen}>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/fees"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PageShell title="Fees">
                   <Fees />
                 </PageShell>
-              }
-            />
-            <Route
-              path="/messages"
-              element={
-                <PageShell title="Messages" setIsOpen={setIsOpen}>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/messages"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PageShell title="Messages">
                   <Messages />
                 </PageShell>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <PageShell title="Settings" setIsOpen={setIsOpen}>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PageShell title="Settings">
                   <Settings />
                 </PageShell>
-              }
-            />
-            <Route
-              path="/announcements"
-              element={
-                <PageShell title="Announcements" setIsOpen={setIsOpen}>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/announcements"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PageShell title="Announcements">
                   <Announcements />
                 </PageShell>
-              }
-            />
-            <Route
-              path="/guide"
-              element={
-                <PageShell title="Guide" setIsOpen={setIsOpen}>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/guide"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PageShell title="Student Guide">
                   <Guide />
                 </PageShell>
-              }
-            />
-            <Route
-              path="/support"
-              element={
-                <PageShell title="Support" setIsOpen={setIsOpen}>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/support"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PageShell title="Support">
                   <Support />
                 </PageShell>
-              }
-            />
-          </Routes>
-        </div>
-      </div>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Catch-all → redirect to dashboard */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </Router>
   );
 };
