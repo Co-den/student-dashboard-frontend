@@ -4,10 +4,10 @@ import axios from "axios";
 
 // --- Async thunks ---
 export const fetchGrades = createAsyncThunk(
-  "grades/fetchGrades",
+  "https://student-dashboard-uah3.onrender.com/api/grades/fetchGrades",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get("/grades");
+      const res = await axios.get("https://student-dashboard-uah3.onrender.com/api/grades");
       return res.data; // [{ course: {...}, score, grade, creditHours }]
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);

@@ -1,142 +1,97 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Navigate, Link } from "react-router-dom";
-import api from "../api/api"; // for posting registration details
-import { setToken, fetchProfile } from "../store/slices/authSlice";
+import { register } from "../store/slices/authSlice";
+import { Link, useNavigate } from "react-router-dom";
 
 const Register = () => {
-  const dispatch = useDispatch();
-  const { user } = useSelector((s) => s.auth);
-
   const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
+    firstname: "",
+    lastname: "",
+    regNumber: "",
     email: "",
     password: "",
-    confirmPassword: "",
   });
-  const [status, setStatus] = useState("idle");
-  const [error, setError] = useState(null);
 
-  if (user) {
-    return <Navigate to="/" replace />;
-  }
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, error } = useSelector((state) => state.auth);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (form.password !== form.confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-    try {
-      setStatus("loading");
-      setError(null);
-      const { data } = await api.post("/auth/register", form);
-      // save token and fetch profile
-      dispatch(setToken(data.token));
-      dispatch(fetchProfile());
-    } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
-    } finally {
-      setStatus("idle");
-    }
+    dispatch(register(form)).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        navigate("/");
+      }
+    });
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-900 p-4">
-      <div className="w-full max-w-md bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-700">
-        <h2 className="text-2xl font-bold text-white mb-6 text-center">
-          Create Your Account
-        </h2>
+    <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4">
+      <div className="w-full max-w-md bg-blue-600 rounded-xl shadow-md p-8">
+        <h2 className="text-2xl font-bold mb-6 text-center text-white">Register</h2>
 
         {error && (
-          <div className="bg-red-500/20 text-red-400 p-2 rounded mb-4 text-sm">
-            {error}
-          </div>
+          <p className="text-red-500 text-sm text-center mb-4">{error}</p>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-300 text-sm mb-1">First Name</label>
-              <input
-                type="text"
-                name="firstName"
-                className="w-full px-3 py-2 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={form.firstName}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-slate-300 text-sm mb-1">Last Name</label>
-              <input
-                type="text"
-                name="lastName"
-                className="w-full px-3 py-2 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={form.lastName}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-slate-300 text-sm mb-1">Email</label>
-            <input
-              type="email"
-              name="email"
-              className="w-full px-3 py-2 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={form.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-slate-300 text-sm mb-1">Password</label>
-            <input
-              type="password"
-              name="password"
-              className="w-full px-3 py-2 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={form.password}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-slate-300 text-sm mb-1">Confirm Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              className="w-full px-3 py-2 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={form.confirmPassword}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
+        <form onSubmit={handleSubmit} className="space-y-4 ">
+          <input
+            type="text"
+            name="firstname"
+            placeholder="First Name"
+            value={form.firstname}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
+          />
+          <input
+            type="text"
+            name="lastname"
+            placeholder="Last Name"
+            value={form.lastname}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
+          />
+          <input
+            type="text"
+            name="regNumber"
+            placeholder="Registration Number"
+            value={form.regNumber}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
+          />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
+          />
           <button
             type="submit"
-            disabled={status === "loading"}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition disabled:opacity-50"
+            className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition"
+            disabled={loading}
           >
-            {status === "loading" ? "Registering..." : "Register"}
+            {loading ? "Registering..." : "Register"}
           </button>
         </form>
 
-        <p className="text-center text-slate-400 mt-4 text-sm">
+        <p className="mt-4 text-sm text-center text-white">
           Already have an account?{" "}
-          <Link
-            to="/login"
-            className="text-blue-400 hover:underline hover:text-blue-300"
-          >
-            Login here
+          <Link to="/login" className="text-white hover:underline">
+            Login
           </Link>
         </p>
       </div>

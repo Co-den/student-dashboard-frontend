@@ -17,10 +17,10 @@ import api from "../../api/api";
  */
 
 export const fetchAnnouncements = createAsyncThunk(
-  "announcements/fetch",
+  "https://student-dashboard-uah3.onrender.com/api/announcements/fetch",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await api.get("/announcements");
+      const { data } = await api.get("https://student-dashboard-uah3.onrender.com/api/announcements");
       // Expect data to be an array: [{...}, ...]
       return data;
     } catch (err) {
@@ -30,10 +30,10 @@ export const fetchAnnouncements = createAsyncThunk(
 );
 
 export const createAnnouncement = createAsyncThunk(
-  "announcements/create",
+  "https://student-dashboard-uah3.onrender.com/api/announcements/create",
   async (payload, { rejectWithValue }) => {
     try {
-      const { data } = await api.post("/announcements", payload);
+      const { data } = await api.post("https://student-dashboard-uah3.onrender.com/api/announcements", payload);
       return data; // created announcement object
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -42,10 +42,10 @@ export const createAnnouncement = createAsyncThunk(
 );
 
 export const updateAnnouncement = createAsyncThunk(
-  "announcements/update",
+  "https://student-dashboard-uah3.onrender.com/api/announcements/update",
   async ({ id, updates }, { rejectWithValue }) => {
     try {
-      const { data } = await api.put(`/announcements/${id}`, updates);
+      const { data } = await api.put(`https://student-dashboard-uah3.onrender.com/api/announcements/${id}`, updates);
       return data; // updated announcement object
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);

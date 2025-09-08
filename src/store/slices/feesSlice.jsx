@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/api";
 
 export const fetchFees = createAsyncThunk(
-  "fees/fetch",
+  "https://student-dashboard-uah3.onrender.com/api/fees/fetch",
   async (_, { getState }) => {
     const id = getState().auth.user?._id;
     const { data } = await api.get(`/fees/${id}`);

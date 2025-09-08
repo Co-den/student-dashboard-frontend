@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/api";
 
-export const fetchMessages = createAsyncThunk("messages/fetch", async () => {
-  const { data } = await api.get("/messages");
+export const fetchMessages = createAsyncThunk("https://student-dashboard-uah3.onrender.com/api/messages/fetch", async () => {
+  const { data } = await api.get("https://student-dashboard-uah3.onrender.com/api/messages");
   return data;
 });
 

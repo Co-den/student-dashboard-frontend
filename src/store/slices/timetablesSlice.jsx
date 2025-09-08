@@ -2,10 +2,10 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/api";
 
 export const fetchTimetable = createAsyncThunk(
-  "timetable/fetch",
+  "https://student-dashboard-uah3.onrender.com/api/timetable/fetch",
   async (_, { getState }) => {
     const id = getState().auth.user?._id;
-    const { data } = await api.get(`/timetable/${id}`);
+    const { data } = await api.get(`https://student-dashboard-uah3.onrender.com/api/timetable/${id}`);
     return data;
   }
 );

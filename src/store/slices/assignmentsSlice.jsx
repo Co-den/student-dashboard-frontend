@@ -2,9 +2,9 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/api";
 
 export const fetchAssignments = createAsyncThunk(
-  "assignments/fetch",
+  "https://student-dashboard-uah3.onrender.com/api/assignments",
   async () => {
-    const { data } = await api.get("/assignments");
+    const { data } = await api.get("https://student-dashboard-uah3.onrender.com/api/assignments");
     return data;
   }
 );

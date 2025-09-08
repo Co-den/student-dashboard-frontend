@@ -1,61 +1,88 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from "../../api/api";
+import axios from "axios";
 
-const savedToken = localStorage.getItem("token");
+const API_URL = "https://student-dashboard-uah3.onrender.com/api/auth";
 
+// Login
 export const login = createAsyncThunk(
   "auth/login",
-  async ({ email, password }) => {
-    const { data } = await api.post("/auth/login", { email, password });
-    return data; // { token, user }
+  async (data, thunkAPI) => {
+    try {
+      const res = await axios.post(
+        `${API_URL}/login`,
+        data
+      );
+      localStorage.setItem("user", JSON.stringify(res.data));
+      return res.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response.data.msg);
+    }
   }
 );
 
-export const fetchProfile = createAsyncThunk("auth/profile", async () => {
-  const { data } = await api.get("/auth/profile");
-  return data; // user
-});
+// Register
+export const register = createAsyncThunk(
+  "auth/register",
+  async (data, thunkAPI) => {
+    try {
+      const res = await axios.post(
+        `${API_URL}/register`,
+        data
+      );
+      localStorage.setItem("user", JSON.stringify(res.data));
+      return res.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response.data.msg);
+    }
+  }
+);
+
+const initialState = {
+  user: localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : null,
+  loading: false,
+  error: null,
+};
 
 const authSlice = createSlice({
   name: "auth",
-  initialState: {
-    user: null,
-    token: savedToken || null,
-    status: "idle",
-    error: null,
-  },
+  initialState,
   reducers: {
-    logout(state) {
+    logout: (state) => {
       state.user = null;
-      state.token = null;
-      localStorage.removeItem("token");
-    },
-    setToken(state, action) {
-      state.token = action.payload;
-      localStorage.setItem("token", action.payload);
+      localStorage.removeItem("user");
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(login.pending, (s) => {
-        s.status = "loading";
-        s.error = null;
+      .addCase(login.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
-      .addCase(login.fulfilled, (s, a) => {
-        s.status = "succeeded";
-        s.user = a.payload.user;
-        s.token = a.payload.token;
-        localStorage.setItem("token", a.payload.token);
+      .addCase(login.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
       })
-      .addCase(login.rejected, (s, a) => {
-        s.status = "failed";
-        s.error = a.error.message;
+      .addCase(login.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
-      .addCase(fetchProfile.fulfilled, (s, a) => {
-        s.user = a.payload;
+
+      .addCase(register.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(register.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+      })
+      .addCase(register.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { logout, setToken } = authSlice.actions;
+export const { logout } = authSlice.actions;
 export default authSlice.reducer;
