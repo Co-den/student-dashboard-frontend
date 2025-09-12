@@ -1,88 +1,69 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { create } from "zustand";
 import axios from "axios";
 
+// Dynamically set API URL based on env
 const API_URL = "https://student-dashboard-uah3.onrender.com/api/auth";
 
-// Login
-export const login = createAsyncThunk(
-  "auth/login",
-  async (data, thunkAPI) => {
-    try {
-      const res = await axios.post(
-        `${API_URL}/login`,
-        data
-      );
-      localStorage.setItem("user", JSON.stringify(res.data));
-      return res.data;
-    } catch (err) {
-      return thunkAPI.rejectWithValue(err.response.data.msg);
-    }
-  }
-);
+axios.defaults.withCredentials = true;
 
-// Register
-export const register = createAsyncThunk(
-  "auth/register",
-  async (data, thunkAPI) => {
-    try {
-      const res = await axios.post(
-        `${API_URL}/register`,
-        data
-      );
-      localStorage.setItem("user", JSON.stringify(res.data));
-      return res.data;
-    } catch (err) {
-      return thunkAPI.rejectWithValue(err.response.data.msg);
-    }
-  }
-);
-
-const initialState = {
+const useAuthStore = create((set) => ({
   user: localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null,
-  loading: false,
+  isAuthenticated: !!localStorage.getItem("user"),
   error: null,
-};
+  isLoading: false,
 
-const authSlice = createSlice({
-  name: "auth",
-  initialState,
-  reducers: {
-    logout: (state) => {
-      state.user = null;
-      localStorage.removeItem("user");
-    },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(login.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(login.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload;
-      })
-      .addCase(login.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      .addCase(register.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(register.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload;
-      })
-      .addCase(register.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+  // Register
+  register: async (data) => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await axios.post(`${API_URL}/register`, data);
+      localStorage.setItem("user", JSON.stringify(res.data));
+      set({
+        user: res.data,
+        isAuthenticated: true,
+        isLoading: false,
       });
+    } catch (error) {
+      set({
+        error: error.response?.data?.msg || "Error registering",
+        isLoading: false,
+      });
+      throw error;
+    }
   },
-});
 
-export const { logout } = authSlice.actions;
-export default authSlice.reducer;
+  // Login
+  login: async (data) => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await axios.post(`${API_URL}/login`, data);
+      localStorage.setItem("user", JSON.stringify(res.data));
+      set({
+        user: res.data,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        error: error.response?.data?.msg || "Error logging in",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  // Logout
+  logout: async () => {
+    localStorage.removeItem("user");
+    set({
+      user: null,
+      isAuthenticated: false,
+      error: null,
+      isLoading: false,
+    });
+  },
+}));
+
+export default useAuthStore;

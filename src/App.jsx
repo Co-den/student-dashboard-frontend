@@ -1,6 +1,10 @@
 import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 // Components
 import { Sidebar, PageShell } from "./components/Sidebar";
@@ -17,17 +21,14 @@ import Announcements from "./pages/Announcements";
 import Guide from "./pages/Guide";
 import Support from "./pages/Support";
 import Login from "./pages/Login";
-import Register from "./pages/Register"; // ✅ new
+import Register from "./pages/Register";
 
 import "./App.css";
 
 // ---------- ProtectedRoute ----------
 const ProtectedRoute = ({ children }) => {
-  const { user } = useSelector((state) => state.auth);
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-  return children;
+  const isAuthenticated = !!localStorage.getItem("token");
+  return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
 // ---------- Layout Wrapper ----------
@@ -48,7 +49,7 @@ const App = () => {
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} /> {/* ✅ Register added */}
+        <Route path="/register" element={<Register />} />
 
         {/* Protected Dashboard Routes */}
         <Route

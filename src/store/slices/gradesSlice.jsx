@@ -1,63 +1,6 @@
 // src/redux/slices/gradeSlice.js
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { create } from "zustand";
 import axios from "axios";
-
-// --- Async thunks ---
-export const fetchGrades = createAsyncThunk(
-  "https://student-dashboard-uah3.onrender.com/api/grades/fetchGrades",
-  async (_, { rejectWithValue }) => {
-    try {
-      const res = await axios.get("https://student-dashboard-uah3.onrender.com/api/grades");
-      return res.data; // [{ course: {...}, score, grade, creditHours }]
-    } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message);
-    }
-  }
-);
-
-export const addGrade = createAsyncThunk(
-  "grades/addGrade",
-  async (gradeData, { rejectWithValue }) => {
-    try {
-      const res = await axios.post("/grades", gradeData);
-      return res.data;
-    } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message);
-    }
-  }
-);
-
-export const updateGrade = createAsyncThunk(
-  "grades/updateGrade",
-  async ({ id, updates }, { rejectWithValue }) => {
-    try {
-      const res = await axios.put(`/grades/${id}`, updates);
-      return res.data;
-    } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message);
-    }
-  }
-);
-
-export const deleteGrade = createAsyncThunk(
-  "grades/deleteGrade",
-  async (id, { rejectWithValue }) => {
-    try {
-      await axios.delete(`/grades/${id}`);
-      return id;
-    } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message);
-    }
-  }
-);
-
-// --- Initial state ---
-const initialState = {
-  items: [],
-  gpa: 0,
-  loading: false,
-  error: null,
-};
 
 // --- Helper GPA calc ---
 function calculateGPA(grades) {
@@ -76,52 +19,80 @@ function calculateGPA(grades) {
     totalCredits += creditHours || 1;
   });
 
-  return totalCredits ? (totalPoints / totalCredits).toFixed(2) : 0;
+  return totalCredits ? Number((totalPoints / totalCredits).toFixed(2)) : 0;
 }
 
-// --- Slice ---
-const gradeSlice = createSlice({
-  name: "grades",
-  initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    builder
-      // Fetch
-      .addCase(fetchGrades.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchGrades.fulfilled, (state, action) => {
-        state.loading = false;
-        state.items = action.payload;
-        state.gpa = calculateGPA(action.payload);
-      })
-      .addCase(fetchGrades.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
+const useGradesStore = create((set, get) => ({
+  items: [],
+  gpa: 0,
+  loading: false,
+  error: null,
 
-      // Add
-      .addCase(addGrade.fulfilled, (state, action) => {
-        state.items.push(action.payload);
-        state.gpa = calculateGPA(state.items);
-      })
-
-      // Update
-      .addCase(updateGrade.fulfilled, (state, action) => {
-        const idx = state.items.findIndex((g) => g._id === action.payload._id);
-        if (idx !== -1) {
-          state.items[idx] = action.payload;
-        }
-        state.gpa = calculateGPA(state.items);
-      })
-
-      // Delete
-      .addCase(deleteGrade.fulfilled, (state, action) => {
-        state.items = state.items.filter((g) => g._id !== action.payload);
-        state.gpa = calculateGPA(state.items);
+  fetchGrades: async () => {
+    set({ loading: true, error: null });
+    try {
+      const res = await axios.get("https://student-dashboard-uah3.onrender.com/api/grades");
+      set({
+        items: res.data,
+        gpa: calculateGPA(res.data),
+        loading: false,
       });
+    } catch (err) {
+      set({
+        loading: false,
+        error: err.response?.data?.message || err.message,
+      });
+    }
   },
-});
 
-export default gradeSlice.reducer;
+  addGrade: async (gradeData) => {
+    try {
+      const res = await axios.post("/grades", gradeData);
+      set((state) => {
+        const newItems = [...state.items, res.data];
+        return {
+          items: newItems,
+          gpa: calculateGPA(newItems),
+        };
+      });
+    } catch (err) {
+      set({ error: err.response?.data?.message || err.message });
+    }
+  },
+
+  updateGrade: async ({ id, updates }) => {
+    try {
+      const res = await axios.put(`/grades/${id}`, updates);
+      set((state) => {
+        const newItems = state.items.map((g) =>
+          g._id === res.data._id ? res.data : g
+        );
+        return {
+          items: newItems,
+          gpa: calculateGPA(newItems),
+        };
+      });
+    } catch (err) {
+      set({ error: err.response?.data?.message || err.message });
+    }
+  },
+
+  deleteGrade: async (id) => {
+    try {
+      await axios.delete(`/grades/${id}`);
+      set((state) => {
+        const newItems = state.items.filter((g) => g._id !== id);
+        return {
+          items: newItems,
+          gpa: calculateGPA(newItems),
+        };
+      });
+    } catch (err) {
+      set({ error: err.response?.data?.message || err.message });
+    }
+  },
+
+  clearError: () => set({ error: null }),
+}));
+
+export default useGradesStore;

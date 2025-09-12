@@ -1,182 +1,90 @@
 // src/store/slices/announcementsSlice.js
-import {
-  createSlice,
-  createAsyncThunk,
-  createSelector,
-} from "@reduxjs/toolkit";
+import { create } from "zustand";
 import api from "../../api/api";
 
-/**
- * Thunks
- * - fetchAnnouncements: GET /announcements
- * - createAnnouncement: POST /announcements
- * - updateAnnouncement: PUT /announcements/:id
- * - deleteAnnouncement: DELETE /announcements/:id
- *
- * Each thunk returns data (or id for delete) and uses rejectWithValue for better error payloads.
- */
+const initialState = {
+  list: [],
+  status: "idle",
+  error: null,
+  createStatus: "idle",
+  updateStatus: "idle",
+  deleteStatus: "idle",
+};
 
-export const fetchAnnouncements = createAsyncThunk(
-  "https://student-dashboard-uah3.onrender.com/api/announcements/fetch",
-  async (_, { rejectWithValue }) => {
+const useAnnouncementsStore = create((set, get) => ({
+  ...initialState,
+
+  fetchAnnouncements: async () => {
+    set({ status: "loading", error: null });
     try {
       const { data } = await api.get("https://student-dashboard-uah3.onrender.com/api/announcements");
-      // Expect data to be an array: [{...}, ...]
-      return data;
+      set({
+        list: Array.isArray(data) ? data : data.items ?? [],
+        status: "succeeded",
+      });
     } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
+      set({
+        status: "failed",
+        error: err.response?.data || err.message,
+      });
     }
-  }
-);
+  },
 
-export const createAnnouncement = createAsyncThunk(
-  "https://student-dashboard-uah3.onrender.com/api/announcements/create",
-  async (payload, { rejectWithValue }) => {
+  createAnnouncement: async (payload) => {
+    set({ createStatus: "loading", error: null });
     try {
       const { data } = await api.post("https://student-dashboard-uah3.onrender.com/api/announcements", payload);
-      return data; // created announcement object
+      set((state) => ({
+        list: [data, ...state.list],
+        createStatus: "succeeded",
+      }));
     } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
+      set({
+        createStatus: "failed",
+        error: err.response?.data || err.message,
+      });
     }
-  }
-);
+  },
 
-export const updateAnnouncement = createAsyncThunk(
-  "https://student-dashboard-uah3.onrender.com/api/announcements/update",
-  async ({ id, updates }, { rejectWithValue }) => {
+  updateAnnouncement: async ({ id, updates }) => {
+    set({ updateStatus: "loading", error: null });
     try {
       const { data } = await api.put(`https://student-dashboard-uah3.onrender.com/api/announcements/${id}`, updates);
-      return data; // updated announcement object
+      set((state) => ({
+        list: state.list.map((a) =>
+          (a._id === data._id || a.id === data.id) ? data : a
+        ),
+        updateStatus: "succeeded",
+      }));
     } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
+      set({
+        updateStatus: "failed",
+        error: err.response?.data || err.message,
+      });
     }
-  }
-);
+  },
 
-export const deleteAnnouncement = createAsyncThunk(
-  "announcements/delete",
-  async (id, { rejectWithValue }) => {
+  deleteAnnouncement: async (id) => {
+    set({ deleteStatus: "loading", error: null });
     try {
       await api.delete(`/announcements/${id}`);
-      return id; // return deleted id so reducer can remove it
+      set((state) => ({
+        list: state.list.filter((a) => (a._id || a.id) !== id),
+        deleteStatus: "succeeded",
+      }));
     } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
-    }
-  }
-);
-
-/**
- * Slice
- */
-const slice = createSlice({
-  name: "announcements",
-  initialState: {
-    list: [],
-    status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
-    error: null,
-    createStatus: "idle",
-    updateStatus: "idle",
-    deleteStatus: "idle",
-  },
-  reducers: {
-    // local-only helpers if needed
-    clearAnnouncementsError(state) {
-      state.error = null;
-    },
-    // replace full list (handy for WebSocket-sync or admin bulk update)
-    setAnnouncements(state, action) {
-      state.list = action.payload;
-      state.status = "succeeded";
-    },
-  },
-  extraReducers: (builder) => {
-    // fetch
-    builder
-      .addCase(fetchAnnouncements.pending, (state) => {
-        state.status = "loading";
-        state.error = null;
-      })
-      .addCase(fetchAnnouncements.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        // normalize if backend returns {items, meta} or just array — handle both
-        state.list = Array.isArray(action.payload)
-          ? action.payload
-          : action.payload.items ?? [];
-      })
-      .addCase(fetchAnnouncements.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload || action.error.message;
-      })
-
-      // create
-      .addCase(createAnnouncement.pending, (state) => {
-        state.createStatus = "loading";
-        state.error = null;
-      })
-      .addCase(createAnnouncement.fulfilled, (state, action) => {
-        state.createStatus = "succeeded";
-        // prepend so newest appears first
-        state.list.unshift(action.payload);
-      })
-      .addCase(createAnnouncement.rejected, (state, action) => {
-        state.createStatus = "failed";
-        state.error = action.payload || action.error.message;
-      })
-
-      // update
-      .addCase(updateAnnouncement.pending, (state) => {
-        state.updateStatus = "loading";
-        state.error = null;
-      })
-      .addCase(updateAnnouncement.fulfilled, (state, action) => {
-        state.updateStatus = "succeeded";
-        const updated = action.payload;
-        const idx = state.list.findIndex(
-          (a) => a._id === updated._id || a.id === updated.id
-        );
-        if (idx !== -1) state.list[idx] = updated;
-      })
-      .addCase(updateAnnouncement.rejected, (state, action) => {
-        state.updateStatus = "failed";
-        state.error = action.payload || action.error.message;
-      })
-
-      // delete
-      .addCase(deleteAnnouncement.pending, (state) => {
-        state.deleteStatus = "loading";
-        state.error = null;
-      })
-      .addCase(deleteAnnouncement.fulfilled, (state, action) => {
-        state.deleteStatus = "succeeded";
-        const id = action.payload;
-        state.list = state.list.filter((a) => (a._id || a.id) !== id);
-      })
-      .addCase(deleteAnnouncement.rejected, (state, action) => {
-        state.deleteStatus = "failed";
-        state.error = action.payload || action.error.message;
+      set({
+        deleteStatus: "failed",
+        error: err.response?.data || err.message,
       });
+    }
   },
-});
 
-export const { clearAnnouncementsError, setAnnouncements } = slice.actions;
-export default slice.reducer;
+  clearAnnouncementsError: () => set({ error: null }),
 
-/**
- * Selectors
- */
-export const selectAnnouncementsState = (state) => state.announcements;
+  setAnnouncements: (announcements) =>
+    set({ list: announcements, status: "succeeded" }),
+}));
 
-export const selectAllAnnouncements = createSelector(
-  selectAnnouncementsState,
-  (s) => s.list
-);
-
-export const selectAnnouncementsById = (id) =>
-  createSelector(selectAllAnnouncements, (list) =>
-    list.find((a) => (a._id || a.id) === id)
-  );
-
-export const selectAnnouncementsStatus = createSelector(
-  selectAnnouncementsState,
-  (s) => ({ status: s.status, error: s.error })
-);
+// Selectors (usage: const list = useAnnouncementsStore(s => s.list))
+export default useAnnouncementsStore;

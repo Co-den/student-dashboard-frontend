@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "../store/slices/authSlice";
+import authStore from "../store/slices/authSlice";
 import coursesReducer from "./slices/coursesSlice";
 import assignmentsReducer from "./slices/assignmentsSlice";
 import gradesReducer from '../store/slices/gradesSlice';
@@ -10,7 +10,7 @@ import announcementsReducer from "./slices/announcementsSlice";
 
 const store = configureStore({
   reducer: {
-    auth: authReducer,
+    auth: authStore,
     courses: coursesReducer,
     assignments: assignmentsReducer,
     grades: gradesReducer,

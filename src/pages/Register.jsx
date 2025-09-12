@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { register } from "../store/slices/authSlice";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import useAuthStore from "../store/slices/authSlice";
+import AuthLayout from "../components/AuthLayout";
 
 const Register = () => {
   const [form, setForm] = useState({
@@ -11,91 +11,79 @@ const Register = () => {
     email: "",
     password: "",
   });
-
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error } = useSelector((state) => state.auth);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const { register, isLoading, error, isAuthenticated } = useAuthStore();
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (isAuthenticated) navigate("/");
+  }, [isAuthenticated, navigate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(register(form)).then((res) => {
-      if (res.meta.requestStatus === "fulfilled") {
-        navigate("/");
-      }
-    });
+    await register(form);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4">
-      <div className="w-full max-w-md bg-blue-600 rounded-xl shadow-md p-8">
-        <h2 className="text-2xl font-bold mb-6 text-center text-white">Register</h2>
+    <AuthLayout title="Register">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && <p className="text-red-400">{error}</p>}
 
-        {error && (
-          <p className="text-red-500 text-sm text-center mb-4">{error}</p>
-        )}
+        <input
+          type="text"
+          placeholder="First Name"
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
+          value={form.firstname}
+          onChange={(e) => setForm({ ...form, firstname: e.target.value })}
+        />
 
-        <form onSubmit={handleSubmit} className="space-y-4 ">
-          <input
-            type="text"
-            name="firstname"
-            placeholder="First Name"
-            value={form.firstname}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
-          />
-          <input
-            type="text"
-            name="lastname"
-            placeholder="Last Name"
-            value={form.lastname}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
-          />
-          <input
-            type="text"
-            name="regNumber"
-            placeholder="Registration Number"
-            value={form.regNumber}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
-          />
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition"
-            disabled={loading}
-          >
-            {loading ? "Registering..." : "Register"}
-          </button>
-        </form>
+        <input
+          type="text"
+          placeholder="Last Name"
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
+          value={form.lastname}
+          onChange={(e) => setForm({ ...form, lastname: e.target.value })}
+        />
 
-        <p className="mt-4 text-sm text-center text-white">
+        <input
+          type="text"
+          placeholder="Registration Number"
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
+          value={form.regNumber}
+          onChange={(e) => setForm({ ...form, regNumber: e.target.value })}
+        />
+
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
+          value={form.password}
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
+        />
+
+        <button
+          disabled={isLoading}
+          className="w-full bg-indigo-500 p-2 rounded text-white hover:bg-indigo-600"
+        >
+          {isLoading ? "Registering..." : "Register"}
+        </button>
+
+        <p className="text-sm text-white text-center">
           Already have an account?{" "}
-          <Link to="/login" className="text-white hover:underline">
+          <Link to="/login" className="underline">
             Login
           </Link>
         </p>
-      </div>
-    </div>
+      </form>
+    </AuthLayout>
   );
 };
 

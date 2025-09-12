@@ -1,27 +1,28 @@
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { login } from "../store/slices/authSlice";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import useAuthStore from "../store/slices/authSlice";
+import AuthLayout from "../components/AuthLayout";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error, user } = useSelector((state) => state.auth);
+
+  const { login, isLoading, error, isAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    if (isAuthenticated) navigate("/");
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await dispatch(login(form));
-    if (res.meta.requestStatus === "fulfilled") {
-      navigate("/");
-    }
+    await login(form);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-900">
-      <form onSubmit={handleSubmit} className="bg-blue-600 p-8 rounded-xl w-96 space-y-4">
-        <h2 className="text-white text-2xl font-bold">Login</h2>
+    <AuthLayout title="Login">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {error && <p className="text-red-400">{error}</p>}
+
         <input
           type="email"
           placeholder="Email"
@@ -29,6 +30,7 @@ const Login = () => {
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
+
         <input
           type="password"
           placeholder="Password"
@@ -36,14 +38,22 @@ const Login = () => {
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
-        <button disabled={loading} className="w-full bg-indigo-500 p-2 rounded text-white">
-          {loading ? "Logging in..." : "Login"}
+
+        <button
+          disabled={isLoading}
+          className="w-full bg-indigo-500 p-2 rounded text-white hover:bg-indigo-600"
+        >
+          {isLoading ? "Logging in..." : "Login"}
         </button>
-        <p className="text-sm text-white">
-          Don’t have an account? <Link to="/register" className="underline">Register</Link>
+
+        <p className="text-sm text-white text-center">
+          Don’t have an account?{" "}
+          <Link to="/register" className="underline">
+            Register
+          </Link>
         </p>
       </form>
-    </div>
+    </AuthLayout>
   );
 };
 

@@ -1,27 +1,23 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { create } from "zustand";
 import api from "../../api/api";
 
-export const fetchMessages = createAsyncThunk("https://student-dashboard-uah3.onrender.com/api/messages/fetch", async () => {
-  const { data } = await api.get("https://student-dashboard-uah3.onrender.com/api/messages");
-  return data;
-});
+const useMessagesStore = create((set) => ({
+  list: [],
+  status: "idle",
+  error: null,
 
-const slice = createSlice({
-  name: "messages",
-  initialState: { list: [], status: "idle", error: null },
-  reducers: {},
-  extraReducers: (b) => {
-    b.addCase(fetchMessages.pending, (s) => {
-      s.status = "loading";
-    })
-      .addCase(fetchMessages.fulfilled, (s, a) => {
-        s.status = "succeeded";
-        s.list = a.payload;
-      })
-      .addCase(fetchMessages.rejected, (s, a) => {
-        s.status = "failed";
-        s.error = a.error.message;
+  fetchMessages: async () => {
+    set({ status: "loading", error: null });
+    try {
+      const { data } = await api.get("https://student-dashboard-uah3.onrender.com/api/messages");
+      set({ list: data, status: "succeeded" });
+    } catch (error) {
+      set({
+        status: "failed",
+        error: error?.message || "Failed to fetch messages",
       });
+    }
   },
-});
-export default slice.reducer;
+}));
+
+export default useMessagesStore;

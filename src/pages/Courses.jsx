@@ -1,16 +1,14 @@
 // frontend/src/pages/Courses.jsx
 import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import SimpleTable from "../components/SimpleTable";
-import { fetchCourses } from "../store/slices/coursesSlice";
+import useCoursesStore from "../store/slices/coursesSlice";
 
 const Courses = () => {
-  const dispatch = useDispatch();
-  const { courses, loading, error } = useSelector((state) => state.courses);
+  const { list, status, error, fetchCourses } = useCoursesStore();
 
   useEffect(() => {
-    dispatch(fetchCourses());
-  }, [dispatch]);
+    fetchCourses();
+  }, [fetchCourses]);
 
   const columns = [
     "Code",
@@ -22,7 +20,7 @@ const Courses = () => {
   ];
 
   const rows =
-    courses?.map((course) => [
+    list?.map((course) => [
       course.code,
       course.title,
       course.instructor,
@@ -46,9 +44,9 @@ const Courses = () => {
       <div className="lg:col-span-2 bg-blue-600 rounded-2xl p-4 border border-blue-400">
         <h2 className="font-bold text-white mb-3">Enrolled Courses</h2>
 
-        {loading && <p className="text-white">Loading courses...</p>}
+        {status === "loading" && <p className="text-white">Loading courses...</p>}
         {error && <p className="text-red-400">{error}</p>}
-        {!loading && !error && <SimpleTable columns={columns} rows={rows} />}
+        {status === "succeeded" && !error && <SimpleTable columns={columns} rows={rows} />}
       </div>
 
       <aside className="bg-blue-600 rounded-2xl p-4 border border-blue-400">
