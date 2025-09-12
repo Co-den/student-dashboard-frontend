@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import api from "../../api/api";
+import axios from "axios";
 
 const useCoursesStore = create((set) => ({
   list: [],
@@ -9,7 +9,7 @@ const useCoursesStore = create((set) => ({
   fetchCourses: async () => {
     set({ status: "loading", error: null });
     try {
-      const { data } = await api.get(
+      const { data } = await axios.get(
         "https://student-dashboard-uah3.onrender.com/api/courses",
         { withCredentials: true }
       );

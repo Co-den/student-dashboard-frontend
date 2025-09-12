@@ -16,7 +16,7 @@ const Register = () => {
   const { register, isLoading, error, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    if (isAuthenticated) navigate("/");
+    if (isAuthenticated) navigate("/login");
   }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {

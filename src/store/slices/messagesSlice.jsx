@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import api from "../../api/api";
+import axios from "axios";
 
 const useMessagesStore = create((set) => ({
   list: [],
@@ -9,7 +9,7 @@ const useMessagesStore = create((set) => ({
   fetchMessages: async () => {
     set({ status: "loading", error: null });
     try {
-      const { data } = await api.get("https://student-dashboard-uah3.onrender.com/api/messages");
+      const { data } = await axios.get("https://student-dashboard-uah3.onrender.com/api/messages");
       set({ list: data, status: "succeeded" });
     } catch (error) {
       set({

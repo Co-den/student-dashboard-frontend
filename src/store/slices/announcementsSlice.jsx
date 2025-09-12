@@ -1,6 +1,6 @@
 // src/store/slices/announcementsSlice.js
 import { create } from "zustand";
-import api from "../../api/api";
+import axios from "axios";
 
 const initialState = {
   list: [],
@@ -17,7 +17,7 @@ const useAnnouncementsStore = create((set, get) => ({
   fetchAnnouncements: async () => {
     set({ status: "loading", error: null });
     try {
-      const { data } = await api.get("https://student-dashboard-uah3.onrender.com/api/announcements");
+      const { data } = await axios.get("https://student-dashboard-uah3.onrender.com/api/announcements");
       set({
         list: Array.isArray(data) ? data : data.items ?? [],
         status: "succeeded",
@@ -33,7 +33,7 @@ const useAnnouncementsStore = create((set, get) => ({
   createAnnouncement: async (payload) => {
     set({ createStatus: "loading", error: null });
     try {
-      const { data } = await api.post("https://student-dashboard-uah3.onrender.com/api/announcements", payload);
+      const { data } = await axios.post("https://student-dashboard-uah3.onrender.com/api/announcements", payload);
       set((state) => ({
         list: [data, ...state.list],
         createStatus: "succeeded",
@@ -49,7 +49,7 @@ const useAnnouncementsStore = create((set, get) => ({
   updateAnnouncement: async ({ id, updates }) => {
     set({ updateStatus: "loading", error: null });
     try {
-      const { data } = await api.put(`https://student-dashboard-uah3.onrender.com/api/announcements/${id}`, updates);
+      const { data } = await axios.put(`https://student-dashboard-uah3.onrender.com/api/announcements/${id}`, updates);
       set((state) => ({
         list: state.list.map((a) =>
           (a._id === data._id || a.id === data.id) ? data : a
@@ -67,7 +67,7 @@ const useAnnouncementsStore = create((set, get) => ({
   deleteAnnouncement: async (id) => {
     set({ deleteStatus: "loading", error: null });
     try {
-      await api.delete(`/announcements/${id}`);
+      await axios.delete(`https://student-dashboard-uah3.onrender.com/api/announcements/${id}`);
       set((state) => ({
         list: state.list.filter((a) => (a._id || a.id) !== id),
         deleteStatus: "succeeded",

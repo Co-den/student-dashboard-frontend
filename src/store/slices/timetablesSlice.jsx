@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import api from "../../api/api";
+import axios from "axios";
 
 const useTimetablesStore = create((set) => ({
   list: [],
@@ -9,7 +9,7 @@ const useTimetablesStore = create((set) => ({
   fetchTimetable: async (userId) => {
     set({ status: "loading", error: null });
     try {
-      const { data } = await api.get(`https://student-dashboard-uah3.onrender.com/api/timetable/${userId}`);
+      const { data } = await axios.get(`https://student-dashboard-uah3.onrender.com/api/timetable/${userId}`);
       set({ list: data, status: "succeeded" });
     } catch (error) {
       set({
